@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Packing Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2E7D32;
+            --primary-light: #4CAF50;
+            --primary-dark: #1B5E20;
+            --secondary-color: #f8f9fa;
+            --text-color: #2C3E50;
+            --text-light: #7F8C8D;
+            --shadow-color: rgba(0, 0, 0, 0.08);
+            --border-color: rgba(0, 0, 0, 0.1);
+            --success-color: #2ECC71;
+            --warning-color: #F1C40F;
+            --error-color: #E74C3C;
+            --accent-color: #3498DB;
+            --gradient-start: #2E7D32;
+            --gradient-end: #1B5E20;
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 20px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-container {
+            background-color: rgba(255, 255, 255, 0.98);
+            border-radius: 24px;
+            box-shadow: 0 10px 40px var(--shadow-color);
+            height: 700px;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            padding: 25px;
+            border-radius: 24px 24px 0 0;
+            text-align: center;
+            box-shadow: 0 4px 15px var(--shadow-color);
+            position: relative;
+            z-index: 1;
+            transform: translateZ(10px);
+        }
+
+        .chat-header h2 {
+            margin: 0;
+            font-size: 26px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-header h2 i {
+            animation: float 3s ease-in-out infinite;
+            font-size: 28px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-5px) rotate(5deg); }
+        }
+
+        .chat-header p {
+            margin: 8px 0 0;
+            font-size: 14px;
+            opacity: 0.9;
+            font-weight: 300;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .suggestions {
+            display: flex;
+            gap: 12px;
+            padding: 20px;
+            overflow-x: auto;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-top: 1px solid var(--border-color);
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) transparent;
+            transform: translateZ(5px);
+        }
+
+        .suggestions::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .suggestions::-webkit-scrollbar-thumb {
+            background-color: var(--primary-color);
+            border-radius: 3px;
+        }
+
+        .suggestion-btn {
+            background: white;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 10px 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 5px var(--shadow-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .suggestion-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .suggestion-btn:hover::before {
+            transform: translateX(100%);
+        }
+
+        .suggestion-btn i {
+            font-size: 14px;
+            transition: transform 0.3s ease;
+        }
+
+        .suggestion-btn:hover i {
+            transform: scale(1.2);
+        }
+
+        .suggestion-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 4px 12px var(--shadow-color);
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 25px;
+            scroll-behavior: smooth;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            transform: translateZ(0);
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 15px 20px;
+            border-radius: 20px;
+            max-width: 75%;
+            animation: messageIn 0.3s ease-out;
+            box-shadow: 0 2px 8px var(--shadow-color);
+            position: relative;
+            line-height: 1.5;
+            transform-origin: center;
+            transition: transform 0.3s ease;
+        }
+
+        @keyframes messageIn {
+            from { 
+                opacity: 0;
+                transform: translateY(10px) scale(0.95) rotate(-1deg);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0) scale(1) rotate(0deg);
+            }
+        }
+
+        .user-message {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            margin-left: auto;
+            border-radius: 20px 20px 0 20px;
+            animation-delay: 0.1s;
+            transform-origin: right;
+        }
+
+        .bot-message {
+            background-color: var(--secondary-color);
+            margin-right: auto;
+            border-radius: 20px 20px 20px 0;
+            border: 1px solid var(--border-color);
+            transform-origin: left;
+        }
+
+        .message:hover {
+            transform: scale(1.01);
+        }
+
+        .bot-message ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 12px 0;
+        }
+
+        .bot-message li {
+            padding: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: listItemIn 0.3s ease-out forwards;
+            opacity: 0;
+            font-size: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .bot-message li:hover {
+            transform: translateX(5px);
+        }
+
+        .bot-message li::before {
+            content: "✓";
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 16px;
+            transition: transform 0.3s ease;
+        }
+
+        .bot-message li:hover::before {
+            transform: scale(1.2);
+        }
+
+        .bot-message h3 {
+            color: var(--primary-color);
+            margin: 15px 0 12px;
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-container {
+            display: flex;
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 0 0 24px 24px;
+            position: relative;
+            box-shadow: 0 -2px 10px var(--shadow-color);
+            transform: translateZ(5px);
+        }
+
+        #message-input {
+            flex-grow: 1;
+            padding: 15px 25px;
+            border: 2px solid var(--border-color);
+            border-radius: 30px;
+            margin-right: 15px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background-color: white;
+            color: var(--text-color);
+            box-shadow: inset 0 2px 4px var(--shadow-color);
+        }
+
+        #message-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1), inset 0 2px 4px var(--shadow-color);
+            transform: translateY(-1px);
+        }
+
+        #message-input::placeholder {
+            color: var(--text-light);
+            transition: opacity 0.3s ease;
+        }
+
+        #message-input:focus::placeholder {
+            opacity: 0.5;
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px var(--shadow-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        button:hover::before {
+            transform: translateX(100%);
+        }
+
+        button i {
+            transition: transform 0.3s ease;
+        }
+
+        button:hover i {
+            transform: translateX(3px);
+        }
+
+        button:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 6px 20px var(--shadow-color);
+        }
+
+        button:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 12px 18px;
+            background-color: var(--secondary-color);
+            border-radius: 20px 20px 20px 0;
+            margin-right: auto;
+            width: fit-content;
+            animation: pulse 1.5s infinite;
+            border: 1px solid var(--border-color);
+            transform: translateZ(0);
+        }
+
+        .typing-indicator span {
+            height: 8px;
+            width: 8px;
+            background-color: var(--primary-color);
+            display: inline-block;
+            border-radius: 50%;
+            margin: 0 3px;
+            animation: typing 1s infinite;
+        }
+
+        @keyframes typing {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 8px;
+            text-align: right;
+            color: var(--text-light);
+            transition: opacity 0.3s ease;
+        }
+
+        .message:hover .message-time {
+            opacity: 1;
+        }
+
+        .message-actions {
+            position: absolute;
+            right: 10px;
+            top: 5px;
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: all 0.3s ease;
+            transform: translateY(-5px);
+        }
+
+        .message:hover .message-actions {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .message-action {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .message-action:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .status-indicator {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            color: var(--success-color);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success-color);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+            box-shadow: 0 0 8px var(--success-color);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .floating-element {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: floatElement 15s infinite linear;
+        }
+
+        @keyframes floatElement {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(50px, 50px) rotate(90deg); }
+            50% { transform: translate(0, 100px) rotate(180deg); }
+            75% { transform: translate(-50px, 50px) rotate(270deg); }
+            100% { transform: translate(0, 0) rotate(360deg); }
+        }
+
+        .theme-switcher {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 15px;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px var(--shadow-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .theme-switcher:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--shadow-color);
+        }
+
+        .theme-switcher i {
+            font-size: 16px;
+            color: var(--primary-color);
+        }
+
+        .theme-switcher span {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px var(--shadow-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: all 0.3s ease;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .notification i {
+            font-size: 20px;
+            color: var(--success-color);
+        }
+
+        .notification span {
+            font-size: 14px;
+            color: var(--text-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-elements">
+        <div class="floating-element" style="width: 50px; height: 50px; top: 10%; left: 10%;"></div>
+        <div class="floating-element" style="width: 30px; height: 30px; top: 20%; left: 80%;"></div>
+        <div class="floating-element" style="width: 40px; height: 40px; top: 60%; left: 20%;"></div>
+        <div class="floating-element" style="width: 25px; height: 25px; top: 70%; left: 70%;"></div>
+    </div>
+    <div class="container">
+        <div class="chat-container">
+            <div class="theme-switcher">
+                <i class="fas fa-palette"></i>
+                <span>Change Theme</span>
+            </div>
+            <div class="chat-header">
+                <h2><i class="fas fa-plane"></i> Travel Packing Assistant</h2>
+                <p>Your personal travel planning companion</p>
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <span>Online</span>
+                </div>
+            </div>
+            <div class="suggestions">
+                <button class="suggestion-btn" onclick="useSuggestion(this)"><i class="fas fa-car"></i> Road trip packing tips</button>
+                <button class="suggestion-btn" onclick="useSuggestion(this)"><i class="fas fa-suitcase"></i> Packing for a weekend</button>
+                <button class="suggestion-btn" onclick="useSuggestion(this)"><i class="fas fa-globe"></i> International travel</button>
+                <button class="suggestion-btn" onclick="useSuggestion(this)"><i class="fas fa-briefcase"></i> Business trip</button>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="message bot-message">
+                    Hello! 👋 I'm your travel packing assistant. I can help you generate packing lists for your trips and answer any travel-related questions. How can I help you today?
+                    <div class="message-time">Just now</div>
+                </div>
+            </div>
+            <div class="typing-indicator" id="typing-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="input-container">
+                <input type="text" id="message-input" placeholder="Ask about your next adventure...">
+                <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i> Send</button>
+            </div>
+        </div>
+    </div>
+    <div class="notification">
+        <i class="fas fa-check-circle"></i>
+        <span>Message sent successfully!</span>
+    </div>
+
+    <script>
+        const messageInput = document.getElementById('message-input');
+        const chatMessages = document.getElementById('chat-messages');
+        const typingIndicator = document.getElementById('typing-indicator');
+        const themeSwitcher = document.querySelector('.theme-switcher');
+        const notification = document.querySelector('.notification');
+
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        function useSuggestion(button) {
+            messageInput.value = button.textContent.trim();
+            messageInput.focus();
+            button.classList.add('active');
+            setTimeout(() => button.classList.remove('active'), 300);
+        }
+
+        function showTypingIndicator() {
+            typingIndicator.style.display = 'block';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            typingIndicator.style.display = 'none';
+        }
+
+        function getCurrentTime() {
+            const now = new Date();
+            return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function showNotification(message) {
+            notification.querySelector('span').textContent = message;
+            notification.classList.add('show');
+            setTimeout(() => notification.classList.remove('show'), 3000);
+        }
+
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message) {
+                // Add user message to chat
+                addMessage(message, 'user');
+                messageInput.value = '';
+                showTypingIndicator();
+                showNotification('Message sent successfully!');
+
+                // Send message to server
+                fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    hideTypingIndicator();
+                    addMessage(data.response, 'bot');
+                })
+                .catch(error => {
+                    hideTypingIndicator();
+                    console.error('Error:', error);
+                    addMessage('Sorry, there was an error processing your request.', 'bot');
+                    showNotification('Error sending message');
+                });
+            }
+        }
+
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            if (sender === 'bot' && text.includes('*')) {
+                // Format the message with HTML if it contains markdown-like formatting
+                const formattedText = text
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/\n/g, '<br>');
+                messageDiv.innerHTML = formattedText;
+            } else {
+                messageDiv.textContent = text;
+            }
+
+            // Add timestamp
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'message-time';
+            timeDiv.textContent = getCurrentTime();
+            messageDiv.appendChild(timeDiv);
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Add floating elements animation
+        function createFloatingElements() {
+            const container = document.querySelector('.floating-elements');
+            for (let i = 0; i < 10; i++) {
+                const element = document.createElement('div');
+                element.className = 'floating-element';
+                element.style.width = `${Math.random() * 30 + 20}px`;
+                element.style.height = element.style.width;
+                element.style.top = `${Math.random() * 100}%`;
+                element.style.left = `${Math.random() * 100}%`;
+                element.style.animationDelay = `${Math.random() * 5}s`;
+                container.appendChild(element);
+            }
+        }
+
+        createFloatingElements();
+
+        // Theme switcher functionality
+        themeSwitcher.addEventListener('click', function() {
+            document.body.classList.toggle('dark-theme');
+            const isDark = document.body.classList.contains('dark-theme');
+            themeSwitcher.querySelector('i').className = isDark ? 'fas fa-sun' : 'fas fa-palette';
+            themeSwitcher.querySelector('span').textContent = isDark ? 'Light Theme' : 'Dark Theme';
+        });
+    </script>
+</body>
+</html> 
